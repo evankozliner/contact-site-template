@@ -1,0 +1,95 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM template with API defined in an external Swagger file along with Lambda integrations and CORS configurations
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+
+      # Allows www.example.com to call these APIs
+      # SAM will automatically add AllowMethods with a list of methods for this API
+      Cors: "'*'"
+
+      DefinitionBody:
+        swagger: 2.0
+        basePath: /prod
+        info:
+          title: AwsSamExample
+        schemes:
+        - https
+        paths:
+          /:
+            x-amazon-apigateway-any-method:
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: 200 response
+                  schema:
+                    $ref: "#/definitions/Empty"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: 200
+                # NOTE: ${LambdaFunction} must match the Lambda resourcename
+                uri: 
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations"
+        
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                type: aws_proxy
+          /{proxy+}:
+            x-amazon-apigateway-any-method:
+              x-amazon-apigateway-auth:
+                type: aws_iam
+              produces:
+              - application/json
+              parameters:
+              - name: proxy
+                in: path
+                required: true
+                type: string
+              responses: {}
+              x-amazon-apigateway-integration:
+                uri: 
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+        definitions:
+          Empty:
+            type: object
+            title: Empty Schema
+
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      # Replace <bucket> with your bucket name
+      CodeUri: notifier/build
+      Handler: app.lambda_handler
+      Runtime: python2.7
+      Events:
+        ProxyApiRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /
+            Method: ANY
+        ProxyApiGreedy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  ApiUrl:
+    Description: URL of your API endpoint
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref ApiGatewayApi
+        - '.execute-api.'
+        - !Ref 'AWS::Region'
+        - '.amazonaws.com/Prod'
