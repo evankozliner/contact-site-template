@@ -6,7 +6,11 @@ title: Email
 description: |
 ---
 
+{% if jekyll.environment == "production" %}
 <form action="https://a29fi61158.execute-api.us-west-2.amazonaws.com/Prod" method="POST" id="contact-us-form">
+{% else %}
+<form action="http://localhost:3000/notify" method="POST" id="contact-us-form">
+{% endif %}
   <div class="form-group">
     <label for="nameInputEmail1">Name</label>
     <input type="text" class="form-control" id="nameInputEmail1" name="name" placeholder="Full name">
