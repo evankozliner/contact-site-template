@@ -3,11 +3,11 @@ from botocore.exceptions import ClientError
 
 # Replace sender@example.com with your "From" address.
 # This address must be verified with Amazon SES.
-SENDER = "Sender Name <getdatingphotos@gmail.com>"
+SENDER = "Sender Name <your-SES-sender@gmail.com>"
 
 # Replace recipient@example.com with a "To" address. If your account 
 # is still in the sandbox, this address must be verified.
-RECIPIENT = "getdatingphotos@gmail.com"
+RECIPIENT = "your-SES-recipient@gmail.com"
 
 # Specify a configuration set. If you do not want to use a configuration
 # set, comment the following variable, and the 
@@ -30,7 +30,7 @@ BODY_TEXT = ("Amazon SES Test (Python)\r\n"
 BODY_HTML = """<html>
 <head></head>
 <body>
-  <h1>Photo meetup request!</h1>
+  <h1>meetup request!</h1>
   <p>Name: {}</p>
   <p>Email address: {}</p>
   <p>Phone number: {}</p>
