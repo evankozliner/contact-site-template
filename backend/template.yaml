@@ -2,6 +2,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWS SAM template with API defined in an external Swagger file along with Lambda integrations and CORS configurations
+  
+Parameters:
+  RecaptchaSecret: {Type: String, Default: ''}
+  Stage: {Type: String, Default: 'dev'}
+
+Conditions:
+  IsProd:
+    !Equals [ !Ref Stage, prod ]
+
 Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
@@ -10,7 +19,10 @@ Resources:
 
       # Allows www.example.com to call these APIs
       # SAM will automatically add AllowMethods with a list of methods for this API
-      Cors: "'*'"
+      #Cors: "'*'" # for allow all origins & requests 
+      Cors: 
+        AllowOrigin: 
+          Fn::If: [ IsProd, "'example-landing-page.s3-website-us-west-2.amazonaws.com'", "'http://localhost:4000'" ]
 
       DefinitionBody:
         swagger: 2.0
@@ -65,10 +77,23 @@ Resources:
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      # Replace <bucket> with your bucket name
       CodeUri: notifier/build
       Handler: app.lambda_handler
       Runtime: python2.7
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - 'SES:*'
+              Resource:
+                - '*'
+      FunctionName: Notifier
+      Environment:
+        Variables:
+          Stage:
+            Ref: Stage
+          RecaptchaSecret: 
+            Ref: RecaptchaSecret
       Events:
         ProxyApiRoot:
           Type: Api
