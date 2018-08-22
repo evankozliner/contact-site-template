@@ -32,6 +32,6 @@ description: |
   </div>
   <p class="thanks">Thanks!  We'll contact you soon.</p>
   <button type="submit" class="btn btn-primary g-recaptcha"
-    data-sitekey="6LfaXGIUAAAAAOtmDbEOt16uWK_sb05FPqnMRo86"
+    data-sitekey="6Lf6hGkUAAAAAM8VCb9EZUJwrODIk46gkjaoLSf0"
     data-callback="onContctUsSubmit" data-badge="inline" >Submit</button>
 </form>

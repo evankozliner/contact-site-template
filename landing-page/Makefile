@@ -1,11 +1,16 @@
-BUCKET_NAME="example-landing-page"
+# This bucket name must be the same as the name for your website!
+BUCKET_NAME="your-bucket-name-here"
+STACK_NAME="your-stack-name-here"
 
-echo:
-	echo $(SITE_BUCKET)
+all:
+	make create
+	echo Sleeping so our bucket exists to upload to...
+	sleep 10
+	make deploy
 
 create: 
 	aws cloudformation create-stack \
-	  --stack-name SiteWithForm \
+	  --stack-name $(STACK_NAME) \
 	  --template-body file://template.yaml \
 	  --parameters ParameterKey=SiteBucketName,ParameterValue=$(BUCKET_NAME)
 
@@ -15,15 +20,15 @@ deploy: build-prod
 empty-bucket:
 	aws s3 rm s3://$(BUCKET_NAME) --recursive
 
-destroy: empty_bucket
-	aws cloudformation delete-stack --stack-name testSite3
+destroy: empty-bucket
+	aws cloudformation delete-stack --stack-name $(STACK_NAME)
 
 build:
 	jekyll build
 
 build-prod:
-	JEKYLL_ENV=production
-	make build
+	JEKYLL_ENV=production jekyll build
 
 serve: 
-	bundle exec jekyll serve --livereload
+	jekyll build
+	jekyll serve --livereload

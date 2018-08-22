@@ -4,6 +4,7 @@ backend/bin
 backend/include
 backend/lib
 backend/notifier/build
+backend/env.json
 
 
 landing-page/_site
